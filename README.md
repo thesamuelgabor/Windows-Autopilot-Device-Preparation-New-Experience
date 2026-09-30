@@ -2,8 +2,7 @@
 
 ## Objective
 
-This project explores Windows Autopilot device preparation, Microsoft's newer, faster provisioning experience for Entra joined-only devices, and compares it directly against the traditional Autopilot flow from [Microsoft Entra Joined/Cloud-Only Windows-11 Autopilot](../01-Entra-Joined-Cloud-Only-Windows11-Autopilot) to show when each is the right tool.
-It reuses the exact app set built in [Intune Application Deployment](../02-Intune-Application-Deployment) rather than introducing new apps.
+This project explores Windows Autopilot device preparation, Microsoft's newer, faster provisioning experience for Entra joined-only devices, and compares it directly against the traditional Autopilot flow from Microsoft Entra Joined/Cloud-Only Windows-11 Autopilot.
 
 ### Skills Learned
 
