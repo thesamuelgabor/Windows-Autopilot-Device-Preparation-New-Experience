@@ -21,13 +21,13 @@ This project explores Windows Autopilot device preparation, Microsoft's newer, f
 
 Built a policy under Devices → Enrollment → Windows Autopilot → Device preparation, tagging targeted devices `GT-DevicePrep-Pilot` and assigning the policy to `SG-Win11-DevicePrep-Pilot`.
 
-<img width="800" height="450" alt="image" src="docs/img/01-device-prep-policy.png" />
+<img width="812" height="816" alt="image" src="https://github.com/user-attachments/assets/73fb2c14-96e9-4860-b65a-87d318705f2d" />
 
 *Ref 1: Device preparation policy*
 
-#### 2. Assign the Existing App Set to the Policy
+#### 2. Assign App Set to the Policy
 
-Attached the same Store app and custom Win32 app built in [Intune Application Deployment](../02-Intune-Application-Deployment) to the preparation policy's Apps and scripts tab, so the minimum needed set installs before the user reaches the desktop, with the rest applying in the background afterward — no new packaging work was needed.
+Attached managed app to the preparation policy, so the minimum needed set installs before the user reaches the desktop.
 
 <img width="800" height="450" alt="image" src="docs/img/02-apps-assigned.png" />
 
