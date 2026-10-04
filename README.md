@@ -33,9 +33,9 @@ The ESP goes through three phases: device preparation, device setup and account 
 Two security groups are needed:
 
 - **Device group** (`SG-DevicePrep-Devices`): Assigned membership, created empty. Intune adds devices to it automatically during enrollment. It must have the **Intune Provisioning Client** service principal as **Owner** (AppId `f1346770-5b25-470b-88bd-d5744ab7952c`). In some tenants it is named *Intune Autopilot ConfidentialClient*. If it is missing in the tenant, add it by following the Microsoft Learn guide for adding the Intune Provisioning Client service principal.
-- **User group** (`SG-DevicePrep-Users`): users who are allowed to deploy devices with the policy.
+- **User group** (`SG-DevicePrep-Users`): users (vendor accounts) who are allowed to deploy devices with the policy.
 
-<img width="306" height="142" alt="image" src="https://github.com/user-attachments/assets/8cafc6fd-0629-46fb-9ca5-c5e02401667c" />
+<img width="936" height="384" alt="image" src="https://github.com/user-attachments/assets/cff3e4af-5f59-49aa-8317-b13a377dcb0e" />
 
 *Ref 1: Device group with the Intune Provisioning Client as owner*
 
@@ -46,9 +46,7 @@ Devices → Enrollment → Device preparation policies → Create → **User-dri
 - **Basics:** name and description
 - **Device group:** select `SG-DevicePrep-Devices` (it can be empty)
 
-<img width="800" height="450" alt="Policy basics and device group" src="docs/img/03-policy-basics-device-group.png" />
-
-*Ref 3: Policy basics and device group*
+<img width="1232" height="342" alt="image" src="https://github.com/user-attachments/assets/9fecdf9b-8eb4-44af-9039-d2248dfa50cb" />
 
 #### 3. Configuration Settings
 
@@ -57,15 +55,11 @@ Devices → Enrollment → Device preparation policies → Create → **User-dri
 - **Apps:** up to 10 apps installed before the user reaches the desktop. Company Portal and Microsoft 365 Apps are a good minimal set, the rest can be installed later from Company Portal.
 - **Scripts:** up to 10 scripts that run before the user can sign in
 
-<img width="800" height="450" alt="Configuration settings" src="docs/img/04-configuration-settings.png" />
-
-*Ref 4: Configuration settings, apps and scripts*
-
 #### 4. Scope Tags and Assignment
 
 Add scope tags if needed, then assign the policy to `SG-DevicePrep-Users`. Review and create.
 
-<img width="800" height="450" alt="Assignment and review" src="docs/img/05-assignment-review.png" />
+<img width="1232" height="342" alt="image" src="https://github.com/user-attachments/assets/bf90fe00-cc18-4dcc-91f4-2a16d20003cb" />
 
 *Ref 5: Assignment and review*
 
@@ -83,7 +77,7 @@ Start the device, go through OOBE (language, network) and sign in as a user from
 
 Afterwards the selected apps (Company Portal, Microsoft 365 Apps) are present on the device.
 
-<img width="800" height="450" alt="Deployment screen" src="docs/img/06-deployment-screen.png" />
+<img width="1026" height="872" alt="Snímka obrazovky 2026-10-04 123738" src="https://github.com/user-attachments/assets/bc22c117-c6eb-43da-88f2-276b27955635" />
 
 *Ref 6: Device preparation deployment screen*
 
