@@ -77,7 +77,7 @@ Start the device, go through OOBE (language, network) and sign in as a user from
 
 Afterwards the selected apps (Company Portal, Microsoft 365 Apps) are present on the device.
 
-<img width="1026" height="872" alt="Snímka obrazovky 2026-10-04 123738" src="https://github.com/user-attachments/assets/bc22c117-c6eb-43da-88f2-276b27955635" />
+<img width="1018" height="768" alt="Snímka obrazovky 2026-10-04 123738" src="https://github.com/user-attachments/assets/3fd596d5-fd9d-429a-8787-3960cc3e5dd4" />
 
 *Ref 6: Device preparation deployment screen*
 
