@@ -2,81 +2,110 @@
 
 ## Objective
 
-Set up Windows Autopilot device preparation, Microsoft's newer provisioning model for Entra joined Windows 11 devices, and compare it with the traditional Autopilot flow.
+Set up Windows Autopilot device preparation policies in Intune, a lighter provisioning model for Entra joined Windows devices that works without hardware hashes, and compare it with the traditional Windows Autopilot flow.
 
 ### Skills Learned
 
-- Creating a device group with the Intune Provisioning Client as owner
-- Configuring an Autopilot device preparation policy (settings, apps, scripts, assignment)
-- Understanding enrollment time grouping and the no-pre-registration model
-- Evaluating deployment speed and admin overhead against traditional Autopilot
+- Understanding how the traditional Autopilot flow works (hardware hash, deployment profile, Enrollment Status Page)
+- Preparing the Entra groups required by device preparation, including the owner of the device group
+- Creating a user-driven device preparation policy (settings, apps, scripts, assignment)
+- Comparing user experience, limits and admin overhead of both models
 
 ### Tools Used
 
-- Microsoft Intune admin center: Windows Autopilot device preparation policies
+- Microsoft Intune admin center
 - Microsoft Entra ID groups
+
+## Background: Traditional Autopilot
+
+Traditional Windows Autopilot needs the following before a device can be deployed:
+
+- **Hardware hash** of every device, imported into the tenant (manually with `Get-WindowsAutopilotInfo -Online`, via CSV, or by the vendor)
+- **Deployment profile** for OOBE settings: deployment mode, join type (Entra joined or Hybrid joined), account type, language and region, device naming
+- **Enrollment Status Page (ESP)** to show progress, set the timeout and error message, and block the device until required apps are installed
+
+The ESP goes through three phases: device preparation, device setup and account setup. The user can sign in after the last phase finishes.
 
 ## Steps
 
-#### 1. Create the Groups
+#### 1. Prepare the Entra Groups
 
-- **User group** (`SG-Win11-DevicePrep-Users`): users allowed to deploy devices. This is the policy assignment.
-- **Device group** (`SG-Win11-DevicePrep-Devices`): Security group with **Assigned** membership, left empty. Add the **Intune Provisioning Client** service principal (AppId `f1346770-5b25-470b-88bd-d5744ab7952c`, in some tenants named *Intune Autopilot ConfidentialClient*) as **Owner**. Devices are added to this group automatically during enrollment.
+Two security groups are needed:
 
-<img src="docs/img/01-groups.png" alt="Groups" width="800" />
+- **Device group** (`SG-DevicePrep-Devices`): Assigned membership, created empty. Intune adds devices to it automatically during enrollment. It must have the **Intune Provisioning Client** service principal as **Owner** (AppId `f1346770-5b25-470b-88bd-d5744ab7952c`). In some tenants it is named *Intune Autopilot ConfidentialClient*. If it is missing in the tenant, add it by following the Microsoft Learn guide for adding the Intune Provisioning Client service principal.
+- **User group** (`SG-DevicePrep-Users`): users who are allowed to deploy devices with the policy.
 
-*Ref 1: Device group with Intune Provisioning Client as owner*
+<img width="306" height="142" alt="image" src="https://github.com/user-attachments/assets/8cafc6fd-0629-46fb-9ca5-c5e02401667c" />
 
-#### 2. Create a Device Preparation Policy
+*Ref 1: Device group with the Intune Provisioning Client as owner*
 
-Devices → Enrollment → Windows → Windows Autopilot device preparation policies → Create.
+#### 2. Create the Device Preparation Policy
+
+Devices → Enrollment → Device preparation policies → Create → **User-driven**.
 
 - **Basics:** name and description
-- **Device group:** `SG-Win11-DevicePrep-Devices`
-- **Configuration settings:** User-driven, Single user, Microsoft Entra joined, Standard user, timeout and custom error message
-- **Assignments:** `SG-Win11-DevicePrep-Users`
+- **Device group:** select `SG-DevicePrep-Devices` (it can be empty)
 
-<img src="docs/img/02-policy.png" alt="Policy" width="800" />
+<img width="800" height="450" alt="Policy basics and device group" src="docs/img/03-policy-basics-device-group.png" />
 
-*Ref 2: Device preparation policy*
+*Ref 3: Policy basics and device group*
 
-#### 3. Select Apps and Scripts
+#### 3. Configuration Settings
 
-In the policy, select the apps and scripts that OOBE waits for, so the minimum needed set installs before the user reaches the desktop. In Intune, assign the same apps and scripts as **Required** to the **device group**, otherwise they do not install.
+- **Deployment settings:** deployment mode, join type (Microsoft Entra joined), user account type (Standard user or Administrator)
+- **Out-of-box experience:** minutes before an installation error is shown, custom error message, allow users to skip setup after multiple attempts, show link to diagnostics
+- **Apps:** up to 10 apps installed before the user reaches the desktop. Company Portal and Microsoft 365 Apps are a good minimal set, the rest can be installed later from Company Portal.
+- **Scripts:** up to 10 scripts that run before the user can sign in
 
-<img src="docs/img/03-apps-assigned.png" alt="Apps" width="800" />
+<img width="800" height="450" alt="Configuration settings" src="docs/img/04-configuration-settings.png" />
 
-*Ref 3: App assignment in device preparation*
+*Ref 4: Configuration settings, apps and scripts*
 
-#### 4. Enroll a Device With No Pre-Registration
+#### 4. Scope Tags and Assignment
 
-Boot a factory-reset Windows 11 device to OOBE. No hardware hash is imported beforehand. When a user from the assigned group signs in, the device is enrolled and added to the device group (enrollment time grouping). The device must not be registered as a classic Autopilot device, otherwise the Autopilot profile takes precedence.
+Add scope tags if needed, then assign the policy to `SG-DevicePrep-Users`. Review and create.
 
-<img src="docs/img/04-hashless-enrollment.png" alt="Hashless enrollment" width="800" />
+<img width="800" height="450" alt="Assignment and review" src="docs/img/05-assignment-review.png" />
 
-*Ref 4: Hashless enrollment*
+*Ref 5: Assignment and review*
 
-#### 5. Monitor the Deployment
+#### 5. Enroll a Device With No Pre-Registration
 
-Devices → Monitor → Windows Autopilot device preparation deployments.
+Start the device, go through OOBE (language, network) and sign in as a user from `SG-DevicePrep-Users`. No ESP is shown. Instead a single deployment screen goes through these stages:
 
-<img src="docs/img/05-monitoring.png" alt="Monitoring" width="800" />
+1. Installing the Intune Management Extension
+2. Installing apps and policies
+3. OOBE questions
+4. Checking for updates
+5. Finalizing the deployment
+6. Windows Hello for Business setup (if configured)
+7. Desktop
 
-*Ref 5: Deployment report*
+Afterwards the selected apps (Company Portal, Microsoft 365 Apps) are present on the device.
 
-#### 6. Comparison: Traditional Autopilot vs. Device Preparation
+<img width="800" height="450" alt="Deployment screen" src="docs/img/06-deployment-screen.png" />
+
+*Ref 6: Device preparation deployment screen*
+
+#### 6. Notes and Good to Know
+
+- If a device has its **hardware hash imported**, the traditional Autopilot profile wins and the user gets the traditional experience.
+- Device preparation has no hardware hash and works for any Windows device, corporate or personal. Restricting enrollment to corporate devices is possible with device platform restrictions combined with corporate device identifiers.
+- Device preparation supports **Entra join only**, hybrid join is not supported.
+- Limits: 10 apps and 10 scripts per policy.
+- There is also an **Automatic (Preview)** policy type for Windows 365 Frontline Cloud PCs in shared mode. It needs the device group but no user assignment.
+- Customization is limited compared to traditional Autopilot (no device naming template, the OOBE questions cannot be skipped).
+
+#### 7. Comparison: Traditional Autopilot vs. Device Preparation
 
 | Aspect | Traditional Autopilot | Device Preparation |
 |---|---|---|
-| Pre-registration | Yes, hardware hash imported ahead of time | No, device registers at first sign-in |
+| Hardware hash | Required, imported ahead of time | Not used |
+| Configuration | Deployment profile + ESP | Single policy |
 | Join type | Entra joined, Hybrid joined | Entra joined only |
-| OS support | Windows 10 and 11 | Windows 11 (22H2/23H2 with updates, 24H2) |
-| Targeting | Autopilot profile on the device | User group (assignment) plus device group |
-| Autopilot Reset | Yes | No |
-| Best fit | Planned rollouts, hybrid environments | Unplanned replacements, shared and frontline devices |
+| Apps and scripts before sign-in | Selectable in ESP | Up to 10 apps and 10 scripts |
+| Customization | Naming template, OOBE settings, pre-provisioning | Limited |
+| User experience | ESP with three phases | One deployment screen |
+| Targeting | Device-based (hash + profile) | User group + device group |
 
-*Ref 6: Provisioning model comparison*
-
-## About
-
-Hash-free Autopilot provisioning model, configured and compared with the traditional flow.
+*Ref 7: Provisioning model comparison*
